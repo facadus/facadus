@@ -13,10 +13,15 @@ define([
                     style: this.style
                 });
                 this.view = new this.View();
+                this.watingForViewReady = true;
                 this.view.on('ready', function () {
                     this.view.setParent(Base.$(container));
                     this.$container = this.view.$('[data-region]');
                     this._routes(this.routes);
+                    this.watingForViewReady = false;
+                    if (this.startRequired) {
+                        this.start();
+                    }
                 }.bind(this));
                 this.view.render();
             } else {
@@ -25,7 +30,12 @@ define([
             }
         },
         start: function () {
-            Base.Backbone.history.start();
+            if (this.watingForViewReady) {
+                this.startRequired = true;
+            } else {
+                this.startRequired = false;
+                Base.Backbone.history.start();
+            }
         },
         stop: function () {
             Base.Backbone.history.stop();
